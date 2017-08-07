@@ -18,6 +18,7 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
+  puts "No params present." unless params
   puts params.inspect
   ticker = params.fetch(:text, "bitcoin")
   puts ticker
