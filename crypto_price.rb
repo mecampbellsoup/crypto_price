@@ -18,24 +18,14 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
-  puts params
+  puts params.inspect
   ticker = params.fetch(:text, "bitcoin")
+  puts ticker
 
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
-    puts "******************"
-    puts "******************"
-    puts "All crypto options *does* include ticker #{ticker}..."
-    puts "******************"
-    puts "******************"
-
     # Perform HTTPS request to CoinMarketCap API
     # Handle the case where ticker symbol does not correspond to a listed currency in the API.
     price_response =  HTTParty.get("https://api.coinmarketcap.com/v1/ticker/#{ticker}")
-    puts "******************"
-    puts "******************"
-    puts "Price response obtained: #{price_response.body}"
-    puts "******************"
-    puts "******************"
 
     btc_price = JSON.parse(price_response.body)[0].fetch('price_btc')
     usd_price = JSON.parse(price_response.body)[0].fetch('price_usd')
