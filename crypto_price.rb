@@ -17,7 +17,12 @@ def not_found_response_body(ticker)
     "#{all_cryptocurrencies(tickers_only: true)[0, 20].join("\n")}."
 end
 
-# curl -X POST http://localhost:9292/crypto-prices/bitcoin-cash
+post '/crypto-prices' do
+  puts params
+  puts self
+  raise "Not implemented!"
+end
+
 post '/crypto-prices/:ticker' do |ticker|
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
 
