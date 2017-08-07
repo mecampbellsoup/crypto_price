@@ -44,13 +44,14 @@ post '/crypto-prices' do
     usd_price = JSON.parse(price_response.body)[0].fetch('price_usd')
 
     # TODO: make the Slack identifiers environment variables instead of hardcoded.
-    webhook_response = HTTParty.post("https://hooks.slack.com/services/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", {
+    webhook_response = HTTParty.post("https://hooks.slack.com/services/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", {
       body: { text: [ btc_price, usd_price ] }.to_json,
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     })
     puts "******************"
     puts "******************"
-    puts "Webhook response obtained: #{webhook_response.body}"
+    puts "Webhook response obtained: #{webhook_response}"
+    puts "Webhook response body: #{webhook_response.body}"
     puts "******************"
     puts "******************"
 
