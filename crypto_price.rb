@@ -18,6 +18,7 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
+  puts params
   ticker = params.fetch(:text, "bitcoin")
 
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
@@ -57,6 +58,6 @@ post '/crypto-prices' do
     #[ webhook_response.code, {}, human_readable_price ]
     [ 200, {}, human_readable_price ]
   else
-    [ 404, {}, not_found_response_body(ticker) ]
+    [ 200, {}, not_found_response_body(ticker) ]
   end
 end
