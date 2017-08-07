@@ -35,7 +35,7 @@ post '/crypto-prices' do
     begin
       HTTParty.post("https://hooks.slack.com/services/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", {
         body: { text: [ btc_price, usd_price ] }.to_json,
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+        headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
       })
     rescue => e
       puts "*********"
