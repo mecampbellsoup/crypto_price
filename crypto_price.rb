@@ -22,12 +22,23 @@ post '/crypto-prices' do
   puts params[:text]
   puts self
   ticker = params[:text].strip
+  puts ticker
 
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
+    puts "******************"
+    puts "******************"
+    puts "All crypto options *does* include ticker #{ticker}..."
+    puts "******************"
+    puts "******************"
 
     # Perform HTTPS request to CoinMarketCap API
     # Handle the case where ticker symbol does not correspond to a listed currency in the API.
     price_response =  HTTParty.get("https://api.coinmarketcap.com/v1/ticker/#{ticker}")
+    puts "******************"
+    puts "******************"
+    puts "Price response obtained: #{price_response.body}"
+    puts "******************"
+    puts "******************"
 
     btc_price = JSON.parse(price_response.body)[0].fetch('price_btc')
     usd_price = JSON.parse(price_response.body)[0].fetch('price_usd')
@@ -37,6 +48,11 @@ post '/crypto-prices' do
       body: { text: [ btc_price, usd_price ] }.to_json,
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
     })
+    puts "******************"
+    puts "******************"
+    puts "Webhook response obtained: #{webhook_response.body}"
+    puts "******************"
+    puts "******************"
 
     human_readable_price =
       "The price of #{ticker} in USD is: #{usd_price}.\n" \
