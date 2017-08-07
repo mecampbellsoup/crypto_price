@@ -18,11 +18,7 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
-  puts params
-  puts params[:text]
-  puts self
-  ticker = params[:text].strip
-  puts ticker
+  ticker = params.fetch(:text, "bitcoin")
 
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
     puts "******************"
@@ -44,22 +40,22 @@ post '/crypto-prices' do
     usd_price = JSON.parse(price_response.body)[0].fetch('price_usd')
 
     # TODO: make the Slack identifiers environment variables instead of hardcoded.
-    webhook_response = HTTParty.post("https://hooks.slack.com/services/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", {
-      body: { text: [ btc_price, usd_price ] }.to_json,
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-    })
-    puts "******************"
-    puts "******************"
-    puts "Webhook response obtained: #{webhook_response}"
-    puts "Webhook response body: #{webhook_response.body}"
-    puts "******************"
-    puts "******************"
+    #webhook_response = HTTParty.post("https://hooks.slack.com/services/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", {
+      #body: { text: [ btc_price, usd_price ] }.to_json,
+      #headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+    #})
+    #puts "******************"
+    #puts "******************"
+    #puts "Webhook response obtained: #{webhook_response.inspect}"
+    #puts "******************"
+    #puts "******************"
 
     human_readable_price =
       "The price of #{ticker} in USD is: #{usd_price}.\n" \
       "The price of #{ticker} in BTC is: #{btc_price}."
 
-    [ webhook_response.code, {}, human_readable_price ]
+    #[ webhook_response.code, {}, human_readable_price ]
+    [ 200, {}, human_readable_price ]
   else
     [ 404, {}, not_found_response_body(ticker) ]
   end
