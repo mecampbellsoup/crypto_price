@@ -20,7 +20,8 @@ end
 post '/crypto-prices' do
   puts params
   puts self
-  raise "Not implemented!"
+  ticker = params[:text].strip
+  redirect "/crypto-prices/#{ticker}"
 end
 
 post '/crypto-prices/:ticker' do |ticker|
