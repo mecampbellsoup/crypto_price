@@ -18,13 +18,8 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
-  puts params
-  puts self
   ticker = params[:text].strip
-  redirect "/crypto-prices/#{ticker}"
-end
 
-post '/crypto-prices/:ticker' do |ticker|
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
 
     # Perform HTTPS request to CoinMarketCap API
