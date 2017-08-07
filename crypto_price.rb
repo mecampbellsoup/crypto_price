@@ -18,6 +18,9 @@ def not_found_response_body(ticker)
 end
 
 post '/crypto-prices' do
+  puts params
+  puts params[:text]
+  puts self
   ticker = params[:text].strip
 
   if all_cryptocurrencies(tickers_only: true).include?(ticker)
