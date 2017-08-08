@@ -40,13 +40,6 @@ class CryptoPrice < Sinatra::Base
         "The price of #{ticker} in USD is: #{usd_price}.\n" \
         "The price of #{ticker} in BTC is: #{btc_price}."
 
-      # Post the current price(s) to the Slackbot
-      # TODO: make the Slack identifiers environment variables instead of hardcoded.
-      HTTParty.post("https://hooks.slack.com/services/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", {
-        body: { text: human_readable_price_with_timestamp }.to_json,
-        headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-      })
-
       [ 200, {}, human_readable_price_with_timestamp ]
     else
       [ 404, {}, not_found_response_body(ticker) ]
