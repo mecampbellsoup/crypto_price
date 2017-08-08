@@ -1,51 +1,105 @@
 require 'sinatra'
 require 'sinatra/json'
 require 'sinatra/reloader' if development?
+require 'pry' if development?
 require 'httparty'
 
-def all_cryptocurrencies(tickers_only: false)
-  # TODO: fetch all available and sort by rank.
-  # Only return the top 20 by market cap.
-  #
-  all_currencies = HTTParty.get("https://api.coinmarketcap.com/v1/ticker")
-  sorted = JSON(all_currencies.body).sort_by { |hash| hash["rank"].to_i }
-  tickers_only ? sorted.map { |fx| fx['id'] } : sorted
-end
+class CryptoPrice < Sinatra::Base
+  CRYPTO_DICTIONARY = {
+    # BTC
+    bitcoin: 'bitcoin',
+    btc:     'bitcoin',
+    xbt:     'bitcoin',
 
-def not_found_response_body(ticker)
-  "#{ticker} not a valid cryptocurrency option. Try one of these instead:\n" \
-    "#{all_cryptocurrencies(tickers_only: true)[0, 20].join("\n")}."
-end
+    # BCC
+    'bitcoin-cash': 'bitcoin-cash',
+    bcc:            'bitcoin-cash',
+    bch:            'bitcoin-cash',
 
-post '/crypto-prices' do
-  puts "No params present." unless params
-  puts params.inspect
-  ticker = params.fetch(:text, "bitcoin")
-  puts ticker
+    # alts
+    ethereum: 'ethereum',
+    eth:      'ethereum',
+    dash:     'dash',
+    monero:   'monero',
+    xmr:      'monero'
+  }.freeze
 
-  if all_cryptocurrencies(tickers_only: true).include?(ticker)
-    # Perform HTTPS request to CoinMarketCap API
-    # Handle the case where ticker symbol does not correspond to a listed currency in the API.
-    price_response =  HTTParty.get("https://api.coinmarketcap.com/v1/ticker/#{ticker}")
+  post '/crypto-prices' do
+    log(ticker)
 
-    btc_price = JSON.parse(price_response.body)[0].fetch('price_btc')
-    usd_price = JSON.parse(price_response.body)[0].fetch('price_usd')
+    # Enforce JSON Accept header from clients
+    pass unless request.accept?('application/json')
 
-    # TODO: make the Slack identifiers environment variables instead of hardcoded.
-    webhook_response = HTTParty.post("https://hooks.slack.com/services/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", {
-      body: { text: [ btc_price, usd_price ] }.to_json,
-      headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-    })
+    if ticker
+      btc_price = JSON.parse(currency.body)[0].fetch('price_btc')
+      usd_price = JSON.parse(currency.body)[0].fetch('price_usd')
+      timestamp = Time.now.iso8601
 
-    puts webhook_response.inspect
-    puts webhook_response.code
-    puts webhook_response.body
+      human_readable_price_with_timestamp =
+        "As of #{timestamp},\n" \
+        "The price of #{ticker} in USD is: #{usd_price}.\n" \
+        "The price of #{ticker} in BTC is: #{btc_price}."
 
-    human_readable_price =
-      "The price of #{ticker} in USD is: #{usd_price}.\n" \
-      "The price of #{ticker} in BTC is: #{btc_price}."
-    [ 200, {}, human_readable_price ]
-  else
-    [ 200, {}, not_found_response_body(ticker) ]
+      # Post the current price(s) to the Slackbot
+      # TODO: make the Slack identifiers environment variables instead of hardcoded.
+      HTTParty.post("https://hooks.slack.com/services/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", {
+        body: { text: human_readable_price_with_timestamp }.to_json,
+        headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+      })
+
+      [ 200, {}, human_readable_price_with_timestamp ]
+    else
+      [ 404, {}, not_found_response_body(ticker) ]
+    end
+  end
+
+  private
+
+  def ticker
+    CRYPTO_DICTIONARY.fetch(raw_ticker.to_sym, nil)
+  end
+
+  def raw_ticker
+    @raw_ticker ||= params.fetch(:text)
+  end
+
+  def params
+    if @params.empty?
+      begin
+        # If params empty, read the request body.
+        # Otherwise use the present params.
+        @params = super.empty? ? Sinatra::IndifferentHash[JSON(request.body.read)] : super
+      end
+    else
+      @params
+    end
+  end
+
+  def log(contents)
+    # NOTE: our 'logger' is just writing to STDOUT
+    puts contents
+  end
+
+  def currency
+    HTTParty.get("https://api.coinmarketcap.com/v1/ticker/#{ticker}")
+  end
+
+  def cryptocurrencies(tickers_only: false)
+    @cryptocurrencies ||= JSON(all_currencies.body).sort_by { |hash| hash["rank"].to_i }
+
+    if tickers_only
+      @cryptocurrencies.map { |fx| fx['id'] }
+    else
+      @cryptocurrencies
+    end
+  end
+
+  def all_currencies
+    @all_currencies ||= HTTParty.get("https://api.coinmarketcap.com/v1/ticker")
+  end
+
+  def not_found_response_body(ticker)
+    "#{ticker} not a valid cryptocurrency option. Try one of these instead:\n" \
+      "#{cryptocurrencies(tickers_only: true)[0, 20].join("\n")}."
   end
 end

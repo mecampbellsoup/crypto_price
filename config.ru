@@ -4,4 +4,4 @@ $stdout.sync = true
 $stderr.sync = true
 
 require './crypto_price'
-run Sinatra::Application
+run CryptoPrice
