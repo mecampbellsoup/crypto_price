@@ -25,24 +25,19 @@ const tickersMap = {
   xmr:      'monero'
 };
 
-exports.fetchPrice = function fetchPrice (req, res) {
+exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
   // Log request details
-  console.log(req);
-  console.log(req.body);
-
   if (req.body.text === undefined) {
     // This is an error case, as "text" is required
     res.status(400).send('No text defined!');
   } else {
     // Get the ticker from params
-    var ticker = req.body.text;
-    console.log(ticker);
+    var tickerParam = req.body.text;
+    ticker = tickersMap[tickerParam];
 
     // Fetch the price from that ticker
     var https = require("https");
-    var currency;
 
-    const https = require('https');
     const options = {
       hostname: 'api.coinmarketcap.com',
       port: 443,
@@ -54,26 +49,31 @@ exports.fetchPrice = function fetchPrice (req, res) {
       }
     };
 
-    https.get(options, (res) => {
-      console.log('statusCode:', res.statusCode);
-      console.log('headers:', res.headers);
+    var rawData = '';
 
-      res.on('data', (d) => {
-        currency += d;
-        console.log(currency);
+    https.get(options, (priceResponse) => {
+      priceResponse.on('data', (d) => {
+        rawData += d;
       });
+
+      priceResponse.on('end', () => {
+        try {
+          console.log('Raw data:', rawData);
+          console.log('Parsed JSON:', JSON.parse(rawData));
+
+          btcPrice = JSON.parse(rawData)[0].price_btc;
+          usdPrice = JSON.parse(rawData)[0].price_usd;
+
+          var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
+          console.log('Human readable prices: ', prices);
+
+          res.status(200).send(prices);
+        } catch (e) {
+          console.error(`Got error: ${e.message}`);
+        }
+      });
+    }).on('error', (e) => {
+      console.error(`Got error: ${e.message}`);
     });
-
-    console.log(currency);
-    console.log(JSON.parse(currency));
-
-    btcPrice = JSON.parse(currency)[0].price_btc);
-    usdPrice = JSON.parse(currency)[0].price_usd);
-
-    human_readable_price_with_timestamp =
-      "The price of " + ticker + " in USD is:" + usdPrice + ".\n" +
-      "The price of " + ticker + " in BTC is:" + btcPrice + "."
-
-    res.status(200).send(humanReadablePrice);
   }
 };
