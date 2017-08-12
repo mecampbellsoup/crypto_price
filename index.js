@@ -23,7 +23,8 @@ const tickersMap = {
   dsh:      'dash',
   monero:   'monero',
   xmr:      'monero',
-  neo:      'neo'
+  neo:      'neo',
+  omg:      'omg'
 };
 
 exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
