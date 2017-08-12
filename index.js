@@ -5,27 +5,9 @@
  * @param {Object} res Cloud Function response context.
  */
 
-const tickersMap = {
-  // BTC
-  bitcoin: 'bitcoin',
-  btc:     'bitcoin',
-  xbt:     'bitcoin',
-
-  // BCC
-  'bitcoin-cash': 'bitcoin-cash',
-  bcc:            'bitcoin-cash',
-  bch:            'bitcoin-cash',
-
-  // altcoins
-  ethereum: 'ethereum',
-  eth:      'ethereum',
-  dash:     'dash',
-  dsh:      'dash',
-  monero:   'monero',
-  xmr:      'monero',
-  neo:      'neo',
-  omg:      'omg'
-};
+var yaml = require('js-yaml');
+var fs = require('fs');
+const tickersMap = yaml.load(fs.readFileSync('dictionary.yml'));
 
 exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
   // Log request details
