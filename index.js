@@ -9,6 +9,29 @@ var yaml = require('js-yaml');
 var fs = require('fs');
 const tickersMap = yaml.load(fs.readFileSync('dictionary.yml'));
 
+exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
+  // Log request details
+  if (req.body.text === undefined) {
+    // This is an error case, as "text" is required
+    res.status(400).send('No text defined!');
+  } else {
+    //1. Set the ticker from params['text']
+    //2. Get the 1-month historical price data (daily data points)
+    //3. Render a chart as an image file
+    //4. Respond with that image to Slack command
+    var chartJson = {
+      "text": "Bitcoin price chart... or doge?",
+      "attachments": [
+        {
+          "image_url": "http://bitcoinmacroeconomics.com/wp-content/uploads/2014/11/doge1115.png"
+        }
+      ]
+    }
+
+    res.status(200).json(chartJson);
+  }
+};
+
 exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
   // Log request details
   if (req.body.text === undefined) {
