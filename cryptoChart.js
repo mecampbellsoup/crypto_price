@@ -21,10 +21,14 @@ var historicalData = {};
 
 for (var m = startDate; m.isBefore(endDate); m.add(1, 'days')) {
   mAsUnix = m.unix();
-  prices = getDayPrice(ticker, mAsUnix);
-  console.log(prices);
-  historicalData[mAsUnix] = prices;
+  getDayPrice(ticker, mAsUnix);
 };
+
+// At this point all historical data should be set in historicalData...
+// But it isn't because this line is reached before the async https.get
+// calls inside of getDayPrice have not finished yet.
+// What to do?
+console.log("Historical data: ", historicalData);
 
 //https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=BTC,USD&ts=1452680400
 function getDayPrice(ticker, timestamp) {
@@ -38,14 +42,16 @@ function getDayPrice(ticker, timestamp) {
     headers: { 'Accept': 'application/json' }
   };
 
-  https.get(options, (priceResponse) => {
+  return https.get(options, (priceResponse) => {
     priceResponse.on('data', (d) => { rawData += d; });
     priceResponse.on('end', () => {
       try {
         parsedJson = JSON.parse(rawData)[ticker];
         btcPrice = parsedJson['BTC'];
         usdPrice = parsedJson['USD'];
-        return([btcPrice, usdPrice]);
+        historicalData[timestamp] = {};
+        historicalData[timestamp].btc = btcPrice;
+        historicalData[timestamp].usd = usdPrice;
       } catch (e) {
         console.error(`Got error: ${e.message}`);
       }
