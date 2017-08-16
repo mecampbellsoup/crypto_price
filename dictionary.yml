@@ -4,14 +4,16 @@ bch: bitcoin-cash
 bitcoin: bitcoin
 bitcoin-cash: bitcoin-cash
 btc: bitcoin
+xbt: bitcoin
 dash: dash
 dsh: dash
 eth: ethereum
+etc: ethereum-classic
 ethereum: ethereum
 ltc: litecoin
 monero: monero
 neo: neo
 omg: omisego
-xbt: bitcoin
 xmr: monero
+monero: monero
 xrp: ripple

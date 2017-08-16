@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "js-yaml": "^3.9.1",
+    "moment": "^2.18.1"
+  }
+}
