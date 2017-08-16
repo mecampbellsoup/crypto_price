@@ -22,6 +22,7 @@ var historicalData = {};
 for (var m = startDate; m.isBefore(endDate); m.add(1, 'days')) {
   mAsUnix = m.unix();
   getDayPrice(ticker, mAsUnix);
+  console.log(getDayPrice(ticker, mAsUnix));
 };
 
 // At this point all historical data should be set in historicalData...
@@ -42,21 +43,31 @@ function getDayPrice(ticker, timestamp) {
     headers: { 'Accept': 'application/json' }
   };
 
-  return https.get(options, (priceResponse) => {
-    priceResponse.on('data', (d) => { rawData += d; });
-    priceResponse.on('end', () => {
-      try {
-        parsedJson = JSON.parse(rawData)[ticker];
-        btcPrice = parsedJson['BTC'];
-        usdPrice = parsedJson['USD'];
-        historicalData[timestamp] = {};
-        historicalData[timestamp].btc = btcPrice;
-        historicalData[timestamp].usd = usdPrice;
-      } catch (e) {
-        console.error(`Got error: ${e.message}`);
-      }
+  return new Promise(function(resolve, reject) {
+    var parsedJson = '';
+
+    https.get(options, (priceResponse) => {
+      priceResponse.on('data', (d) => {
+        rawData += d;
+      });
+
+      priceResponse.on('end', () => {
+        try {
+          console.log("Trying to fetch price data...");
+          parsedJson = JSON.parse(rawData)[ticker];
+          btcPrice = parsedJson['BTC'];
+          usdPrice = parsedJson['USD'];
+          historicalData[timestamp] = {};
+          historicalData[timestamp].btc = btcPrice;
+          historicalData[timestamp].usd = usdPrice;
+          resolve(historicalData[timestamp]);
+        } catch (e) {
+          console.error(`Got error: ${e.message}`);
+          reject(Error("It broke"));
+        }
+      });
+    }).on('error', (e) => {
+      console.error(`Got error: ${e.message}`);
     });
-  }).on('error', (e) => {
-    console.error(`Got error: ${e.message}`);
-  });
+  })
 };
