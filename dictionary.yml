@@ -12,8 +12,8 @@ etc: ethereum-classic
 ethereum: ethereum
 ltc: litecoin
 monero: monero
+xmr: monero
 neo: neo
 omg: omisego
-xmr: monero
-monero: monero
 xrp: ripple
+ripple: ripple
