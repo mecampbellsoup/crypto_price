@@ -45,6 +45,7 @@ function getDayPrice(ticker, timestamp) {
         parsedJson = JSON.parse(rawData)[ticker];
         btcPrice = parsedJson['BTC'];
         usdPrice = parsedJson['USD'];
+        return([btcPrice, usdPrice]);
       } catch (e) {
         console.error(`Got error: ${e.message}`);
       }
