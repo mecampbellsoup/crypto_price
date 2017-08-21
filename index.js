@@ -98,6 +98,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
           }
         ]
       };
+      console.log("Here is the chartJson: ", chartJson);
       res.status(200).json(chartJson);
     });
   };
