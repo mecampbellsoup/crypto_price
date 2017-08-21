@@ -35,10 +35,7 @@ function getDayPrice(ticker, timestamp) {
           parsedJson = JSON.parse(rawData)[ticker];
           btcPrice = parsedJson['BTC'];
           usdPrice = parsedJson['USD'];
-          historicalData[timestamp] = {};
-          historicalData[timestamp].btc = btcPrice;
-          historicalData[timestamp].usd = usdPrice;
-          resolve([timestamp, historicalData[timestamp]]);
+          resolve([timestamp, { btc: btcPrice, usd: usdPrice }]);
         } catch (e) {
           console.error(`Got error: ${e.message}`);
           reject(e);
@@ -68,7 +65,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
 
     // Fetch the price from that ticker
     ticker = 'ETH';
-    var historicalData = {};
 
     var pricePromises = [];
 
@@ -91,7 +87,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
 
       var exec = require("child_process").exec;
       var result = exec('ruby -e "puts \'Hello from Ruby!\'"', function (err, stdout, stderr) {
-        console.log(stdout);
+        return(stdout);
       });
 
       var chartJson = {
