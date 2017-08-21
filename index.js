@@ -106,6 +106,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       res.status(200).json(chartJson);
     }
   };
+};
 
 //////////////////////
 // fetchCryptoPrice //
