@@ -9,6 +9,7 @@ const yaml = require('js-yaml');
 const fs = require('fs');
 const tickersMap = yaml.load(fs.readFileSync('dictionary.yml'));
 const moment = require('moment');
+const https = require("https");
 
 //https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=BTC,USD&ts=1452680400
 function getDayPrice(ticker, timestamp) {
@@ -66,7 +67,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     var endDateUnix = endDate.unix();
 
     // Fetch the price from that ticker
-    var https = require("https");
     ticker = 'ETH';
     var historicalData = {};
 
