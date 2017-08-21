@@ -101,10 +101,9 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
             "image_url": "http://bitcoinmacroeconomics.com/wp-content/uploads/2014/11/doge1115.png"
           }
         ]
-      }
-
+      };
       res.status(200).json(chartJson);
-    }
+    });
   };
 };
 
