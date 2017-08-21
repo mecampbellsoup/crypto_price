@@ -1,7 +1,7 @@
 // Deps
-var yaml = require('js-yaml');
-var fs = require('fs');
-var moment = require('moment');
+const yaml = require('js-yaml');
+const fs = require('fs');
+const moment = require('moment');
 
 var endDate = moment();
 var startDate = moment().subtract(1, 'months');
@@ -22,9 +22,22 @@ for (var m = startDate; m.isSameOrBefore(endDate); m.add(1, 'days')) {
   pricePromises.push(getDayPrice(ticker, mAsUnix));
 };
 
-Promise.resolve(pricePromises).then(function(data) {
-  console.log("Resolving price promises...");
-  console.log(data);
+Promise.all(pricePromises).then(function(data) {
+  var timestamps = [];
+  var btcPrices = [];
+  var usdPrices = [];
+
+  data.forEach(function(datumWithTimestamp) {
+    timestamps.push(datumWithTimestamp[0]);
+    btcPrices.push(datumWithTimestamp[1].btc);
+    usdPrices.push(datumWithTimestamp[1].usd);
+  });
+
+  var exec = require("child_process").exec;
+
+  exec('ruby -e "puts \'Hello from Ruby!\'"', function (err, stdout, stderr) {
+    console.log(stdout);
+  });
 });
 
 //https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=BTC,USD&ts=1452680400
