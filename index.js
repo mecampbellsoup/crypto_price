@@ -31,18 +31,22 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       method: 'POST'
     };
 
-    var rawData = '';
-
+    https.get(options, (priceResponse) => {
     https.post(options, (chartResponse) => {
-      var chartJson = {
-        "text": "Foo!",
-        "attachments": [
-          //I think this can also just be the root endpoint...
-          { "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }
-        ]
-      };
-      res.status(200).json(chartJson);
-    }));
+      chartResponse.on('end', () => {
+        var chartJson = {
+          "text": "Foo!",
+          "attachments": [
+            // I think this can also just be the root endpoint...
+            { "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }
+          ]
+        };
+
+        res.status(200).json(chartJson);
+      });
+    }).on('error', (e) => {
+      console.error(`Got error: ${e.message}`);
+    });
   };
 };
 
