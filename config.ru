@@ -3,5 +3,5 @@
 $stdout.sync = true
 $stderr.sync = true
 
-require './crypto_price'
+require 'src/crypto_price'
 run CryptoPrice

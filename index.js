@@ -24,17 +24,21 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     var tickerParam = req.body.text;
     ticker = cryptoCompareTickersMap[tickerParam];
 
-    var exec = require("child_process").exec;
-    Promise.resolve(exec('ruby src/crypto_chart.rb ' + ticker, function (err, stdout, stderr) {
-      console.log('stdout:', stdout);
-      console.log('stderr:', stderr);
+    const options = {
+      hostname: 'young-sierra-83280.herokuapp.com',
+      port: 443,
+      path: '/chart/' + ticker,
+      method: 'POST'
+    };
 
+    var rawData = '';
+
+    https.post(options, (chartResponse) => {
       var chartJson = {
-        "text": stdout,
+        "text": "Foo!",
         "attachments": [
-          {
-            "image_url": 'chart.png'
-          }
+          //I think this can also just be the root endpoint...
+          { "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }
         ]
       };
       res.status(200).json(chartJson);

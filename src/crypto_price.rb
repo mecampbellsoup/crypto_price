@@ -3,9 +3,58 @@ require 'sinatra/json'
 require 'sinatra/reloader' if development?
 require 'pry' if development?
 require 'httparty'
+require 'googlecharts'
+require 'yaml'
+require 'active_support/core_ext/date/calculations'
+
+#https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=BTC,USD&ts=1452680400
+def get_price(ticker, timestamp)
+  HTTParty.get(
+    "https://min-api.cryptocompare.com/data/pricehistorical?fsym=#{ticker}&tsyms=BTC,USD&ts=#{timestamp}"
+  )
+end
 
 class CryptoPrice < Sinatra::Base
   CRYPTO_DICTIONARY = YAML.load_file('cmc-dictionary.yml')
+
+  # Any GET request to the root endpoint will serve chart.png from public dir
+  get '/*.*' do
+    send_file('public/chart.png')
+  end
+
+  post '/chart/:ticker' do |ticker|
+    end_date    = Date.today
+    start_date  = end_date.months_ago(1)
+    dates_range = (start_date .. end_date)
+    dates_list  = dates_range.to_a
+    timestamps  = dates_list.map { |d| d.to_time.utc.to_i }
+
+    usd_prices = []
+    btc_prices = []
+
+    timestamps.map do |timestamp|
+      response = get_price(ticker, timestamp)
+      prices = response.parsed_response[ticker]
+      usd_prices << prices.fetch("USD")
+      btc_prices << prices.fetch("BTC")
+    end
+
+    # Chart file to be written to public/chart.png
+    filename = 'public/chart.png'
+
+    # NOTE: Only charting USD prices for now.
+    chart = Gchart.new(
+      type:     :line,
+      theme:    :thirty7signals,
+      title:    "#{ticker} 1m price history",
+      data:     [usd_prices],
+      filename: filename,
+      axis_with_labels: [['x'], ['y']],
+      axis_labels: [dates_list.join("|")]
+    )
+    chart.file
+    200
+  end
 
   post '/crypto-prices' do
     log(ticker)
