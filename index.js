@@ -31,6 +31,10 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       method: 'POST'
     };
 
+    // Respond 200 OK immediately.
+    // Slack times out after 3000ms.
+    res.status(200).json({ text: "Fetching your " + ticker + " chart..." })
+
     var request = https.request(options, (chartResponse) => {
       chartResponse.on('end', () => {
         var chartJson = {
