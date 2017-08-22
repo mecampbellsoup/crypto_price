@@ -5,24 +5,7 @@ require 'pry' if development?
 require 'httparty'
 
 class CryptoPrice < Sinatra::Base
-  CRYPTO_DICTIONARY = {
-    # BTC
-    bitcoin: 'bitcoin',
-    btc:     'bitcoin',
-    xbt:     'bitcoin',
-
-    # BCC
-    'bitcoin-cash': 'bitcoin-cash',
-    bcc:            'bitcoin-cash',
-    bch:            'bitcoin-cash',
-
-    # alts
-    ethereum: 'ethereum',
-    eth:      'ethereum',
-    dash:     'dash',
-    monero:   'monero',
-    xmr:      'monero'
-  }.freeze
+  CRYPTO_DICTIONARY = YAML.load_file('cmc-dictionary.yml')
 
   post '/crypto-prices' do
     log(ticker)
