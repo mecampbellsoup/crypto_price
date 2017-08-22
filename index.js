@@ -5,11 +5,16 @@
  * @param {Object} res Cloud Function response context.
  */
 
-var yaml = require('js-yaml');
-var fs = require('fs');
-const tickersMap = yaml.load(fs.readFileSync('dictionary.yml'));
+const yaml = require('js-yaml');
+const fs = require('fs');
+const https = require("https");
 
-exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
+//////////////////////
+// fetchCryptoChart //
+//////////////////////
+//
+exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
+  const cryptoCompareTickersMap = yaml.load(fs.readFileSync('cc-dictionary.yml'));
   // Log request details
   if (req.body.text === undefined) {
     // This is an error case, as "text" is required
@@ -17,7 +22,39 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
   } else {
     // Get the ticker from params
     var tickerParam = req.body.text;
-    ticker = tickersMap[tickerParam];
+    ticker = cryptoCompareTickersMap[tickerParam];
+
+    Promise.resolve(exec('ruby src/crypto_chart.rb ' + ticker, function (err, stdout, stderr) {
+      console.log('stdout:', stdout);
+
+      var chartJson = {
+        "text": ,
+        "attachments": [
+          {
+            "image_url": 'chart.png'
+          }
+        ]
+      };
+      res.status(200).json(chartJson);
+    }));
+  };
+};
+
+//////////////////////
+// fetchCryptoPrice //
+//////////////////////
+//
+exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
+  const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
+
+  // Log request details
+  if (req.body.text === undefined) {
+    // This is an error case, as "text" is required
+    res.status(400).send('No text defined!');
+  } else {
+    // Get the ticker from params
+    var tickerParam = req.body.text;
+    ticker = coinMarketCapTickersMap[tickerParam];
 
     // Fetch the price from that ticker
     var https = require("https");
