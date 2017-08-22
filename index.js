@@ -28,7 +28,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       console.log('stdout:', stdout);
 
       var chartJson = {
-        "text": ,
+        "text": stdout,
         "attachments": [
           {
             "image_url": 'chart.png'
