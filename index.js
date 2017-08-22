@@ -24,6 +24,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     var tickerParam = req.body.text;
     ticker = cryptoCompareTickersMap[tickerParam];
 
+    var exec = require("child_process").exec;
     Promise.resolve(exec('ruby src/crypto_chart.rb ' + ticker, function (err, stdout, stderr) {
       console.log('stdout:', stdout);
 
