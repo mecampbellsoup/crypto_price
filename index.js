@@ -46,7 +46,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     }).on('error', (e) => {
       console.error(`Got error: ${e.message}`);
     });
-  });
+  };
 };
 
 //////////////////////
