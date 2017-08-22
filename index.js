@@ -7,9 +7,6 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
-const cryptoCompareTickersMap = yaml.load(fs.readFileSync('cc-dictionary.yml'));
-const moment = require('moment');
 const https = require("https");
 
 //////////////////////
@@ -17,6 +14,7 @@ const https = require("https");
 //////////////////////
 //
 exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
+  const cryptoCompareTickersMap = yaml.load(fs.readFileSync('cc-dictionary.yml'));
   // Log request details
   if (req.body.text === undefined) {
     // This is an error case, as "text" is required
@@ -47,6 +45,8 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
 //////////////////////
 //
 exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
+  const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
+
   // Log request details
   if (req.body.text === undefined) {
     // This is an error case, as "text" is required
