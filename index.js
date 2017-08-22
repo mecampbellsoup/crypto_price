@@ -31,7 +31,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       method: 'POST'
     };
 
-    https.get(options, (priceResponse) => {
     https.post(options, (chartResponse) => {
       chartResponse.on('end', () => {
         var chartJson = {
@@ -47,7 +46,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     }).on('error', (e) => {
       console.error(`Got error: ${e.message}`);
     });
-  };
+  });
 };
 
 //////////////////////
