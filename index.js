@@ -86,8 +86,9 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       });
 
       var exec = require("child_process").exec;
-      var result = exec('ruby -e "puts \'Hello from Ruby!\'"', function (err, stdout, stderr) {
-        return(stdout);
+      var result = exec('ruby src/crypto_chart.rb '+ ticker, function (err, stdout, stderr) {
+        // crypto_chart.rb will write the image file to disk
+        // read it from the filesystem and serve it with the chartJson response
       });
 
       var chartJson = {
