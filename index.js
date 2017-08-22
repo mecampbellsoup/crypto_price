@@ -31,7 +31,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
       method: 'POST'
     };
 
-    https.post(options, (chartResponse) => {
+    var request = https.request(options, (chartResponse) => {
       chartResponse.on('end', () => {
         var chartJson = {
           "text": "Foo!",
@@ -43,9 +43,13 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
 
         res.status(200).json(chartJson);
       });
-    }).on('error', (e) => {
+    })
+
+    request.on('error', (e) => {
       console.error(`Got error: ${e.message}`);
     });
+
+    request.end();
   };
 };
 
