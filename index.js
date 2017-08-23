@@ -45,16 +45,19 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     console.log("Still executing despite ending the first Slack response...");
 
     request.post(updateChartUrl, function (error, response, body) {
+      console.log("Updating the chart...");
+
       if (error) {
         console.log("Update chart response errored: ", error);
       } else {
+        console.log("Chart updated!");
         var chartJson = {
           "text": "Boom!",
           "attachments": [{ "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }]
         };
 
-        request.post(
-          notifySlackUrl, { json: chartJson }, function (error, response, body) {
+        request.post(notifySlackUrl, { json: chartJson }, function (error, response, body) {
+            console.log("Notifying Slack...");
             if (!error && response.statusCode == 200) {
               console.log(body)
             }
