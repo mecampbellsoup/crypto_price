@@ -26,7 +26,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     console.log("tickerParam", tickerParam);
     console.log("req.body", req.body);
 
-    console.log("responseUrl", responseUrl);
     ticker = cryptoCompareTickersMap[tickerParam];
 
     // POST to the Sinatra app to update chart.png
