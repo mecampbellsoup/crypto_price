@@ -34,7 +34,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     var request = require('request');
     const url = require('url');
 
-    const updateChartUrl = 'young-sierra-83280.herokuapp.com/chart/' + ticker;
+    const updateChartUrl = 'https://young-sierra-83280.herokuapp.com/chart/' + ticker;
     const notifySlackUrl = req.body.response_url;
     console.log("notifySlackUrl", notifySlackUrl);
 
