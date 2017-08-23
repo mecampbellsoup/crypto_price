@@ -26,42 +26,43 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     console.log("tickerParam", tickerParam);
     console.log("req.body", req.body);
 
-    const url = require('url');
-    const responseUrl = url.parse(req.body.response_url);
-    console.log("response_url", response_url);
+    console.log("responseUrl", responseUrl);
     ticker = cryptoCompareTickersMap[tickerParam];
 
     // POST to the Sinatra app to update chart.png
     // Once finished, send the GET /chart.png URL back to
     // responseUrl.
-    const options = {
-      hostname: 'young-sierra-83280.herokuapp.com',
-      port: 443,
-      path: '/chart/' + ticker,
-      method: 'POST'
-    };
+    var request = require('request');
+    const url = require('url');
+
+    const updateChartUrl = 'young-sierra-83280.herokuapp.com/chart/' + ticker;
+    const notifySlackUrl = req.body.response_url;
+    console.log("notifySlackUrl", notifySlackUrl);
 
     // Respond 200 OK immediately.
     // Slack times out after 3000ms.
+    console.log("Ending the initial request from Slack...");
     res.status(200).json({ text: "Fetching your " + ticker + " chart..." }).end();
+    console.log("Still executing despite ending the first Slack response...");
 
-    var request = https.request(options, (chartResponse) => {
-      chartResponse.on('end', () => {
+    request.post(updateChartUrl, function (error, response, body) {
+      if (error) {
+        console.log("Update chart response errored: ", error);
+      } else {
         var chartJson = {
-          "text": "Foo!",
-          "attachments": [
-            // I think this can also just be the root endpoint...
-            { "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }
-          ]
+          "text": "Boom!",
+          "attachments": [{ "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }]
         };
-      });
-    })
 
-    request.on('error', (e) => {
-      console.error(`Got error: ${e.message}`);
+        request.post(
+          notifySlackUrl, { json: chartJson }, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              console.log(body)
+            }
+          }
+        );
+      };
     });
-
-    request.end();
   };
 };
 

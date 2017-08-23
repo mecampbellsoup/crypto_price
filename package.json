@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "js-yaml": "^3.9.1"
+    "js-yaml": "^3.9.1",
+    "request": "^2.81.0"
   }
 }
