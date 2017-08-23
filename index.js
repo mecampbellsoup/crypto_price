@@ -51,9 +51,10 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
         console.log("Update chart response errored: ", error);
       } else {
         console.log("Chart updated!");
+        var readChartUrl = 'https://young-sierra-83280.herokuapp.com/chart.png';
         var chartJson = {
-          "text": "Boom!",
-          "attachments": [{ "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }],
+          "text": readChartUrl,
+          "attachments": [{ "image_url": readChartUrl }],
           "unfurl_media": true,
           "unfurl_links": true
         };
