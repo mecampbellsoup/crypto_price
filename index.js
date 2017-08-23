@@ -22,6 +22,11 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
   } else {
     // Get the ticker from params
     var tickerParam = req.body.text;
+    var responseUrl = req.body.response_url;
+    console.log("tickerParam", tickerParam);
+    console.log("response_url", response_url);
+    console.log("req.body", req.body);
+
     ticker = cryptoCompareTickersMap[tickerParam];
 
     const options = {
