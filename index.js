@@ -53,7 +53,9 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
         console.log("Chart updated!");
         var chartJson = {
           "text": "Boom!",
-          "attachments": [{ "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }]
+          "attachments": [{ "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }],
+          "unfurl_media": true,
+          "unfurl_links": true
         };
 
         request.post(notifySlackUrl, { json: chartJson }, function (error, response, body) {
