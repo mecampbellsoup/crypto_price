@@ -22,13 +22,18 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
   } else {
     // Get the ticker from params
     var tickerParam = req.body.text;
-    var responseUrl = req.body.response_url;
+
     console.log("tickerParam", tickerParam);
-    console.log("response_url", response_url);
     console.log("req.body", req.body);
 
+    const url = require('url');
+    const responseUrl = url.parse(req.body.response_url);
+    console.log("response_url", response_url);
     ticker = cryptoCompareTickersMap[tickerParam];
 
+    // POST to the Sinatra app to update chart.png
+    // Once finished, send the GET /chart.png URL back to
+    // responseUrl.
     const options = {
       hostname: 'young-sierra-83280.herokuapp.com',
       port: 443,
@@ -38,7 +43,7 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
 
     // Respond 200 OK immediately.
     // Slack times out after 3000ms.
-    res.status(200).json({ text: "Fetching your " + ticker + " chart..." })
+    res.status(200).json({ text: "Fetching your " + ticker + " chart..." }).end();
 
     var request = https.request(options, (chartResponse) => {
       chartResponse.on('end', () => {
@@ -49,8 +54,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
             { "image_url": 'https://young-sierra-83280.herokuapp.com/chart.png' }
           ]
         };
-
-        res.status(200).json(chartJson);
       });
     })
 
