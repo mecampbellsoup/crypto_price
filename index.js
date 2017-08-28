@@ -104,6 +104,12 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
       console.log('Response body: ', body);
       btcPrice = body[0].price_btc;
       usdPrice = body[0].price_usd;
+      try {
+        var parsedJson = JSON.parse(body);
+        console.log("parsedJson", parsedJson);
+      } catch (e) {
+        console.log(e);
+      };
 
       var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
       var priceJson = { "text": prices };
