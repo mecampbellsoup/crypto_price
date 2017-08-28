@@ -19,7 +19,7 @@ class CryptoPrice < Sinatra::Base
 
   # Any GET request to the root endpoint will serve chart.png from public dir
   get '/*.*' do
-    # automatically checks public for a file matching *.* pattern in name
+    send_file('public/chart.png')
   end
 
   post '/chart/:ticker' do |ticker|
