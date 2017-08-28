@@ -16,7 +16,7 @@ const request = require('request');
 exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
   const cryptoCompareTickersMap = yaml.load(fs.readFileSync('cc-dictionary.yml'));
   // Log request details
-  if (req.body.text === undefined) {
+  if (req.body.text.trim()) {
     // This is an error case, as "text" is required
     res.status(400).send('No text defined!');
   } else {
@@ -78,7 +78,7 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
   const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
 
   // Log request details
-  if (req.body.text === undefined) {
+  if (req.body.text.trim()) {
     // This is an error case, as "text" is required.
     // Respond w/ 200 status so the message below is displayed to the user.
     res.status(200).send('No text defined!');
@@ -90,7 +90,6 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
     // Fetch the price from that ticker
     const cryptoPriceUrl = 'https://api.coinmarketcap.com/v1/ticker/' + ticker + '/'
     const notifySlackUrl = req.body.response_url;
-    console.log("notifySlackUrl", notifySlackUrl);
 
     // Respond 200 OK immediately.
     // Slack times out after 3000ms.
@@ -100,13 +99,11 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
 
     request(cryptoPriceUrl, function (error, response, body) {
       var parsedJson = JSON.parse(body);
-      console.log("parsedJson", parsedJson);
       btcPrice = parsedJson[0].price_btc;
       usdPrice = parsedJson[0].price_usd;
 
       var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
       var priceJson = { "text": prices };
-      console.log('Human readable prices: ', prices);
 
       if (error) {
         console.log("Update price response errored: ", error);
