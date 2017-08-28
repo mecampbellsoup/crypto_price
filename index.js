@@ -10,19 +10,62 @@ const fs = require('fs');
 const request = require('request');
 
 //////////////////////
+// fetchCryptoPrice //
+//////////////////////
+//
+exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
+  const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
+
+  // Log request details
+  var tickerParam = req.body.text.trim();
+  if (tickerParam) {
+    ticker = coinMarketCapTickersMap[tickerParam];
+    // Fetch the price from that ticker
+    const cryptoPriceUrl = 'https://api.coinmarketcap.com/v1/ticker/' + ticker + '/'
+    const notifySlackUrl = req.body.response_url;
+
+    // Respond 200 OK immediately.
+    // Slack times out after 3000ms.
+    console.log("Ending the initial request from Slack...");
+    res.status(200).json({ text: "Fetching the freshest " + ticker + " price..." }).end();
+    console.log("Still executing despite ending the first Slack response...");
+
+    request(cryptoPriceUrl, function (error, response, body) {
+      var parsedJson = JSON.parse(body);
+      btcPrice = parsedJson[0].price_btc;
+      usdPrice = parsedJson[0].price_usd;
+
+      var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
+      var priceJson = { "text": prices };
+
+      if (error) {
+        console.log("Update price response errored: ", error);
+      } else {
+        request.post(notifySlackUrl, { json: priceJson }, function (error, response, body) {
+          console.log("Notifying Slack...");
+          if (!error && response.statusCode == 200) {
+            console.log(body)
+          }
+        });
+      };
+    });
+  } else {
+    // This is an error case, as "text" is required.
+    // Respond w/ 200 status so the message below is displayed to the user.
+    res.status(200).send('No text defined!');
+  }
+};
+
+//////////////////////
 // fetchCryptoChart //
 //////////////////////
 //
 exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
   const cryptoCompareTickersMap = yaml.load(fs.readFileSync('cc-dictionary.yml'));
   // Log request details
-  if (req.body.text.trim()) {
-    // This is an error case, as "text" is required
-    res.status(400).send('No text defined!');
-  } else {
+  var tickerParam = req.body.text.trim();
+  if (tickerParam) {
     // Get the ticker from params
-    var tickerParam = req.body.text;
-
     console.log("tickerParam", tickerParam);
     console.log("req.body", req.body);
 
@@ -59,62 +102,17 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
         };
 
         request.post(notifySlackUrl, { json: chartJson }, function (error, response, body) {
-            console.log("Notifying Slack...");
-            if (!error && response.statusCode == 200) {
-              console.log(body)
-            }
-          }
-        );
-      };
-    });
-  };
-};
-
-//////////////////////
-// fetchCryptoPrice //
-//////////////////////
-//
-exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
-  const coinMarketCapTickersMap = yaml.load(fs.readFileSync('cmc-dictionary.yml'));
-
-  // Log request details
-  if (req.body.text.trim()) {
-    // This is an error case, as "text" is required.
-    // Respond w/ 200 status so the message below is displayed to the user.
-    res.status(200).send('No text defined!');
-  } else {
-    // Get the ticker from params
-    var tickerParam = req.body.text;
-    ticker = coinMarketCapTickersMap[tickerParam];
-
-    // Fetch the price from that ticker
-    const cryptoPriceUrl = 'https://api.coinmarketcap.com/v1/ticker/' + ticker + '/'
-    const notifySlackUrl = req.body.response_url;
-
-    // Respond 200 OK immediately.
-    // Slack times out after 3000ms.
-    console.log("Ending the initial request from Slack...");
-    res.status(200).json({ text: "Fetching the freshest " + ticker + " price..." }).end();
-    console.log("Still executing despite ending the first Slack response...");
-
-    request(cryptoPriceUrl, function (error, response, body) {
-      var parsedJson = JSON.parse(body);
-      btcPrice = parsedJson[0].price_btc;
-      usdPrice = parsedJson[0].price_usd;
-
-      var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
-      var priceJson = { "text": prices };
-
-      if (error) {
-        console.log("Update price response errored: ", error);
-      } else {
-        request.post(notifySlackUrl, { json: priceJson }, function (error, response, body) {
           console.log("Notifying Slack...");
           if (!error && response.statusCode == 200) {
             console.log(body)
           }
-        });
+        }
+        );
       };
     });
-  }
+  } else {
+    // This is an error case, as "text" is required.
+    // Respond w/ 200 status so the message below is displayed to the user.
+    res.status(200).send('No text defined!');
+  };
 };
