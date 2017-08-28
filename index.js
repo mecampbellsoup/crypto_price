@@ -7,7 +7,7 @@
 
 const yaml = require('js-yaml');
 const fs = require('fs');
-const https = require("https");
+const request = require('request');
 
 //////////////////////
 // fetchCryptoChart //
@@ -31,7 +31,6 @@ exports.fetchCryptoChart = function fetchCryptoChart (req, res) {
     // POST to the Sinatra app to update chart.png
     // Once finished, send the GET /chart.png URL back to
     // responseUrl.
-    var request = require('request');
     const url = require('url');
 
     const updateChartUrl = 'https://young-sierra-83280.herokuapp.com/chart/' + ticker;
@@ -80,52 +79,46 @@ exports.fetchCryptoPrice = function fetchCryptoPrice (req, res) {
 
   // Log request details
   if (req.body.text === undefined) {
-    // This is an error case, as "text" is required
-    res.status(400).send('No text defined!');
+    // This is an error case, as "text" is required.
+    // Respond w/ 200 status so the message below is displayed to the user.
+    res.status(200).send('No text defined!');
   } else {
     // Get the ticker from params
     var tickerParam = req.body.text;
     ticker = coinMarketCapTickersMap[tickerParam];
 
     // Fetch the price from that ticker
-    var https = require("https");
+    const cryptoPriceUrl = 'https://api.coinmarketcap.com/v1/ticker/' + ticker + '/'
+    const notifySlackUrl = req.body.response_url;
+    console.log("notifySlackUrl", notifySlackUrl);
 
-    const options = {
-      hostname: 'api.coinmarketcap.com',
-      port: 443,
-      path: '/v1/ticker/' + ticker + '/',
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    };
+    // Respond 200 OK immediately.
+    // Slack times out after 3000ms.
+    console.log("Ending the initial request from Slack...");
+    res.status(200).json({ text: "Fetching the freshest " + ticker + " price..." }).end();
+    console.log("Still executing despite ending the first Slack response...");
 
-    var rawData = '';
+    request(cryptoPriceUrl, function (error, response, body) {
+      console.log(response.statusCode)
+      console.log(response.headers['content-type'])
+      console.log('Response body: ', body);
+      btcPrice = body[0].price_btc;
+      usdPrice = body[0].price_usd;
 
-    https.get(options, (priceResponse) => {
-      priceResponse.on('data', (d) => {
-        rawData += d;
-      });
+      var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
+      var priceJson = { "text": prices };
+      console.log('Human readable prices: ', prices);
 
-      priceResponse.on('end', () => {
-        try {
-          console.log('Raw data:', rawData);
-          console.log('Parsed JSON:', JSON.parse(rawData));
-
-          btcPrice = JSON.parse(rawData)[0].price_btc;
-          usdPrice = JSON.parse(rawData)[0].price_usd;
-
-          var prices = "The price of " + ticker + " in USD is: $" + usdPrice + ".\n" + "The price of " + ticker + " in BTC is: " + btcPrice + "."
-          console.log('Human readable prices: ', prices);
-
-          res.status(200).send(prices);
-        } catch (e) {
-          console.error(`Got error: ${e.message}`);
-        }
-      });
-    }).on('error', (e) => {
-      console.error(`Got error: ${e.message}`);
+      if (error) {
+        console.log("Update price response errored: ", error);
+      } else {
+        request.post(notifySlackUrl, { json: priceJson }, function (error, response, body) {
+          console.log("Notifying Slack...");
+          if (!error && response.statusCode == 200) {
+            console.log(body)
+          }
+        });
+      };
     });
   }
 };
